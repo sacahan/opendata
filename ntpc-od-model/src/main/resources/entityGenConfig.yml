@@ -1,0 +1,30 @@
+#  https://github.com/smartnews/jpa-entity-generator/blob/master/src/test/resources/entityGenConfig.yml
+jdbcSettings:
+  url: "jdbc:sqlserver://localhost:1433;databaseName=MOCK_DB"
+  username: "sa"
+  password: "tghyj#0711"
+  driverClassName: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+packageName: "com.udn.ntpc.od.model.entity.domain"
+
+tableScanMode: "RuleBased"
+
+tableScanRules:
+  - tableNames: ["MOCK_.*"]
+
+outputDirectory: "target/entity"
+
+interfaceRules:
+  - interfaces: [{name: "java.io.Serializable"}]
+
+classAnnotationRules:
+  - {annotations: [{code: "@EntityListeners({AuditingEntityListener.class})"}]}
+
+fieldTypeRules:
+  - {fieldNames: ["createTime", "updateTime"], typeName: "Date"}
+
+fieldAnnotationRules:
+  - {fieldName: "createUser", annotations: [{code: '@CreatedBy'}]}
+  - {fieldName: "createTime", annotations: [{code: '@CreatedDate'}, {code: '@Temporal(TIMESTAMP)'}]}
+  - {fieldName: "updateUser", annotations: [{code: '@LastModifiedBy'}]}
+  - {fieldName: "updateTime", annotations: [{code: '@LastModifiedDate'}, {code: '@Temporal(TIMESTAMP)'}]}

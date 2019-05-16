@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} | %highlight[%-5level] - %msg, at %blue(%class.%method\(%file:%line\)), %yellow([%thread]) %n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.udn" level="DEBUG"/>
+
+    <!--
+    <logger name="org.hibernate.type" level="TRACE"/>
+    <logger name="org.hibernate.cache" level="DEBUG"/>
+    <logger name="org.ehcache" level="DEBUG"/>
+    -->
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
+    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>
+
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

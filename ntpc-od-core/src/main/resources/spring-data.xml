@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<!-- 資料輸出格式設定，DataCfgZipFilePo.sourceType 的預設允許內容 -->
+	<util:list id="sourceTypeList" list-class="java.util.ArrayList" value-type="java.lang.String">
+		<value>csv</value>
+		<value>json</value>
+		<value>xml</value>
+	</util:list>
+	
+	<!-- 資料輸出格式設定，DataCfgZipFilePo.sourceType 的預設允許內容 -->
+	<util:map id="fieldTypes" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.Boolean">
+		<entry key="number" value="true"/>
+		<entry key="string" value="true"/>
+	</util:map>
+	
+	<!-- odata 條件運算式對照 -->
+	<util:map id="filterOperators" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+		<entry key="eq" value=" = "/>
+		<entry key="ne" value=" != "/>
+		<entry key="gt" value=" &gt; "/>
+		<entry key="ge" value=" &gt;= "/>
+		<entry key="lt" value=" &lt; "/>
+		<entry key="le" value=" &lt;= "/>
+		<entry key="like" value=" like "/>
+	</util:map>
+	
+	<!-- odata 邏輯運算式對照 -->
+	<util:map id="whereOperators" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+		<entry key="and" value=" AND "/>
+		<entry key="or" value=" OR "/>
+		<entry key="not" value=" AND NOT "/>
+	</util:map>
+
+    <!-- DBDataInfoService 對照 -->
+    <util:map id="dbDataInfoServices" map-class="java.util.HashMap" key-type="java.lang.String" value-type="com.udn.ntpc.od.core.service.data.dbinfo.DBDataInfoService">
+        <entry key="H2" value-ref="h2DataInfoServiceImpl"/>
+        <entry key="MySQL" value-ref="mySQLDataInfoServiceImpl"/>
+        <entry key="SQLServer" value-ref="SQLServerDataInfoServiceImpl"/>
+    </util:map>
+
+    <!-- APIDataInfoService 對照 -->
+    <util:map id="apiDataInfoServices" map-class="java.util.HashMap" key-type="java.lang.String" value-type="com.udn.ntpc.od.core.service.data.apiinfo.APIDataInfoService">
+        <entry key="JSON" value-ref="jsonAPIDataInfoServiceImpl"/>
+        <entry key="XML" value-ref="xmlAPIDataInfoServiceImpl"/>
+        <entry key="CSV" value-ref="csvAPIDataInfoServiceImpl"/>
+        <entry key="RSS" value-ref="rssAPIDataInfoServiceImpl"/>
+    </util:map>
+
+    <!-- DataCfgTableInfoService 對照 -->
+    <util:map id="dataCfgTableInfoServices" map-class="java.util.HashMap" key-type="java.lang.String" value-type="com.udn.ntpc.od.core.service.cfg.DataCfgTableInfoService">
+        <entry key="H2" value-ref="h2DataCfgTableInfoServiceImpl" />
+        <entry key="MySQL" value-ref="mySQLDataCfgTableInfoServiceImpl"/>
+        <entry key="SQLServer" value-ref="SQLServerDataCfgTableInfoServiceImpl"/>
+    </util:map>
+
+</beans>

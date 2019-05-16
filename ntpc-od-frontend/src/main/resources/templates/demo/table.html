@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="template :: head"></head>
+
+<body id="page-top">
+<!-- Custom styles for this page -->
+<link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul th:replace="template :: sidebar"></ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Topbar -->
+            <nav th:replace="template :: topbar"></nav>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <div id="vueApp" class="container-fluid">
+
+                <!-- Page Heading -->
+                <!--<h1 class="h3 mb-2 text-gray-800">Tables</h1>-->
+                <!--<p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below. For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>-->
+
+                <!-- DataTales Example -->
+                <div v-cloak class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="input-group mb-3">
+                                    <select v-model="searchForm.field" class="custom-select" id="inputGroupSelect02" style="width: 10%">
+                                        <option value="" selected>Choose...</option>
+                                        <option value="name">姓名</option>
+                                        <option value="city">居住城市</option>
+                                        <option value="gender">性別</option>
+                                    </select>
+                                    <input v-model="searchForm.keyword" type="text" class="form-control" aria-label="Text input with dropdown button">
+                                    <div class="input-group-append">
+                                        <button @click="doSearch" class="btn btn-outline-secondary" type="button">搜尋</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 d-flex justify-content-end">
+                                <button @click="openForm()" type="button" class="btn btn-primary btn-sm mb-2 pl-3 pr-3 py-0">新增</button>
+                            </div>
+                        </div>
+                        <div v-show="loading" class="text-center mt-4">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                        <div v-show="!loading" class="table-responsive">
+                            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <template v-for="h in headers">
+                                        <th @click="doSort(h)" :key="h.field" style="cursor: pointer">{{h.label}}</th>
+                                    </template>
+                                </tr>
+                                </thead>
+                                <tbody v-for="item in list">
+                                <tr @click="openForm(item)" :key="item.userId">
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.city}}</td>
+                                    <td>{{item.gender === 'M' ? '男' : '女'}}</td>
+                                    <td>{{item.birthday | $_formatDate}}</td>
+                                    <td>{{item.status === 'Y' ? '啟用' : '停用'}}</td>
+                                    <td>{{item.note}}</td>
+                                    <td>{{item.updateTime}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination justify-content-center">
+                                    <li :class="{'disabled': pagination.first}" class="page-item">
+                                        <a @click.prevent="doPage('first')" class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true">&lt;&lt;</span>
+                                        </a>
+                                    </li>
+                                    <li :class="{'disabled': pagination.first}" class="page-item">
+                                        <a @click.prevent="doPage('previous')" class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true">&lt;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item"><a class="page-link" href="javascript:void(0);">{{pagination.page + 1}}</a></li>
+                                    <li :class="{'disabled': pagination.last}" class="page-item">
+                                        <a @click.prevent="doPage('next')" class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true">&gt;</span>
+                                        </a>
+                                    </li>
+                                    <li :class="{'disabled': pagination.last}" class="page-item">
+                                        <a @click.prevent="doPage('last')" class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true">&gt;&gt;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Modal -->
+                <div class="modal fade bd-example-modal-lg" id="editFormModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalScrollableTitle">編輯內容</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="form-name" class="col-form-label">Name:</label>
+                                            <input v-model="editForm.name"
+                                                   @input="$v.editForm.name.$touch()"
+                                                   class="form-control"
+                                                   :class="{'is-invalid':$v.editForm.name.$error, 'is-valid':!$v.editForm.name.$error && $v.editForm.name.$dirty}"
+                                                   type="text"
+                                                   id="form-name">
+                                            <div class="invalid-feedback">Please provide a valid name.</div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="form-city" class="col-form-label">City:</label>
+                                            <input v-model="editForm.city"
+                                                   @input="$v.editForm.city.$touch()"
+                                                   :class="{'is-invalid':$v.editForm.city.$error, 'is-valid':!$v.editForm.city.$error && $v.editForm.city.$dirty}"
+                                                   class="form-control"
+                                                   id="form-city">
+                                            <div class="invalid-feedback">Please provide a valid city.</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="form-email" class="col-form-label">Email:</label>
+                                            <input v-model="editForm.email"
+                                                   @input="$v.editForm.email.$touch()"
+                                                   :class="{'is-invalid':$v.editForm.email.$error, 'is-valid':!$v.editForm.email.$error && $v.editForm.email.$dirty}"
+                                                   class="form-control"
+                                                   id="form-email">
+                                            <div class="invalid-feedback">Please provide a valid email.</div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="form-status" class="col-form-label">Status:</label>
+                                            <select v-model="editForm.status" class="form-control" id="form-status">
+                                                <option value="Y">啟用</option>
+                                                <option value="N">停用</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="form-gender" class="col-form-label">Gender:</label>
+                                            <select v-model="editForm.gender" class="form-control" id="form-gender">
+                                                <option value="M">男</option>
+                                                <option value="F">女</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="form-birthday" class="col-form-label">Birthday:</label>
+                                            <input v-model="editForm.birthday"
+                                                   @input="$v.editForm.birthday.$touch()"
+                                                   :class="{'is-invalid':$v.editForm.birthday.$error, 'is-valid':!$v.editForm.birthday.$error && $v.editForm.birthday.$dirty}"
+                                                   class="form-control datetimepicker-input"
+                                                   id="form-birthday"
+                                                   data-toggle="datetimepicker"
+                                                   data-target="#form-birthday"/>
+                                            <div class="invalid-feedback">Please provide a valid birthday.</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="form-note" class="col-form-label">Note:</label>
+                                        <textarea v-model="editForm.note" id="form-note" class="form-control"></textarea>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="form-createUser">Create User</label>
+                                            <input :value="editForm.createUser" class="form-control" id="form-createUser" readonly>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="form-createTime">Create Time</label>
+                                            <input :value="editForm.createTime" class="form-control" id="form-createTime" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="form-updateUser">Update User</label>
+                                            <input :value="editForm.updateUser" class="form-control" id="form-updateUser" readonly>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="form-updateTime">Update Time</label>
+                                            <input :value="editForm.updateTime" class="form-control" id="form-updateTime" readonly>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button v-show="!!editForm.userId" @click="doDelete" type="button" class="btn btn-danger">
+                                    <span v-if="deleting" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span v-else>刪除</span>
+                                </button>
+                                <button @click="doSave" type="button" class="btn btn-primary">
+                                    <span v-if="saving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span v-else>儲存</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer th:replace="template :: footer"></footer>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<script type="application/javascript" th:inline="javascript">
+    // 預設payload為application/json
+    $.ajaxSetup({cache: false, contentType: "application/json; charset=utf-8"});
+
+    // 設定vuelidate驗證套件
+    // https://vuelidate.netlify.com/#sub-v-values
+    Vue.use(window.vuelidate.default);
+    const required = validators.required;
+    const email = validators.email;
+    const minLength = validators.minLength;
+
+    const app = new Vue({
+        el: '#vueApp',
+        created () {
+            this.doSearch()
+        },
+        mounted () {
+            $('#form-birthday').datepicker({
+                dateFormat: 'yy-mm-dd 00:00:00',
+                onSelect (date) {
+                    // 更新Vue範圍屬性
+                    app.editForm.birthday = date;
+                }
+            });
+        },
+        data: {
+            headers: [
+                {label: 'Name', field: 'name', desc: false},
+                {label: 'City', field: 'city', desc: false},
+                {label: 'Gender', field: 'gender', desc: false},
+                {label: 'Birthday', field: 'birthday', desc: false},
+                {label: 'Status', field: 'status', desc: false},
+                {label: 'Note', field: 'note', desc: false},
+                {label: 'Update Time', field: 'updateTime', desc: false}
+            ],
+            list: [],
+            searchForm: {
+                field: '',
+                keyword: ''
+            },
+            pagination: {
+                page: 0,
+                pages: 1,
+                size: 10,
+                sort: 'userId',
+                total: 0,
+                last: true,
+                first: true,
+                empty: true
+            },
+            editForm: {
+                userId: null,
+                name: null,
+                city: null,
+                email: null,
+                gender: 'M',
+                birthday: null,
+                note: null,
+                status: "Y",
+                createUser: null,
+                createTime: null,
+                updateUser: null,
+                updateTime: null
+            },
+            loading: false,
+            saving: false,
+            deleting: false
+        },
+        validations: {
+            editForm: {
+                name: {required},
+                city: {required},
+                email: {required, email},
+                birthday: {required},
+            }
+        },
+        watch: {
+            'searchForm.field' (newVal) {
+                if (newVal === '') this.searchForm.keyword = ''
+            },
+            criteria (newVal) {
+                this.doSearch();
+            }
+        },
+        computed: {
+            criteria () {
+                return {
+                    nextPage: this.pagination.page,
+                    sort: this.pagination.sort
+                }
+            }
+        },
+        methods: {
+            // 搜尋資料
+            doSearch () {
+                this.loading = true;
+                const url = `/api/userList?page=${this.pagination.page}&size=${this.pagination.size}&sort=${this.pagination.sort}`;
+                const param = {};
+                if (this.searchForm.field) param[this.searchForm.field] = this.searchForm.keyword;
+                $.post(url, JSON.stringify(param))
+                 .done(resp => {
+                     this.list = resp.content;
+                     this.pagination.page = resp.number;
+                     this.pagination.pages = resp.totalPages;
+                     this.pagination.total = resp.totalElements;
+                     this.pagination.last = resp.last;
+                     this.pagination.first = resp.first;
+                     this.pagination.empty = resp.empty;
+                 })
+                 .fail(resp => { alert(resp.message) })
+                 .always(() => { this.loading = false })
+            },
+            // 開啟編輯視窗
+            openForm (item) {
+                if (item) {
+                    // 修改
+                    this.editForm = Object.assign({}, item)
+                } else {
+                    // 新增
+                    this.editForm = {
+                        userId: null,
+                        name: null,
+                        city: null,
+                        email: null,
+                        gender: 'M',
+                        birthday: null,
+                        note: null,
+                        status: "Y",
+                        createUser: null,
+                        createTime: null,
+                        updateUser: null,
+                        updateTime: null
+                    }
+                }
+                this.$v.$reset()
+                $('#editFormModal').modal('show')
+            },
+            // 儲存資料
+            doSave () {
+                this.saving = true;
+                $.post('/api/user', JSON.stringify(this.editForm))
+                 .done(resp => {
+                     if (resp !== 'success') alert(resp.message)
+                     else {
+                         $('#editFormModal').modal('hide');
+                         this.doSearch();
+                     }
+                 })
+                 .fail(resp => { alert(resp.message) })
+                 .always(() => { this.saving = false; })
+            },
+            // 刪除資料
+            doDelete () {
+                this.deleting = true;
+                $.ajax({url: `/api/user/${this.editForm.userId}`, type: 'DELETE'})
+                 .done(resp => {
+                     if (resp !== 'success') alert(resp.message)
+                     else {
+                         $('#editFormModal').modal('hide');
+                         this.doSearch();
+                     }
+                 })
+                 .fail(resp => { alert(resp.message) })
+                 .always(() => { this.deleting = false; })
+            },
+            // 分頁變更
+            doPage (flag) {
+                if (flag === 'first') {
+                    this.pagination.page = 0;
+                } else if (flag === 'last') {
+                    this.pagination.page = this.pagination.pages - 1;
+                } else if (flag === 'previous') {
+                    this.pagination.page = this.pagination.page - 1 <= 0 ? 0 : this.pagination.page - 1;
+                } else {
+                    this.pagination.page = this.pagination.page + 1 >= this.pagination.pages ? this.pagination.pages - 1 : this.pagination.page + 1;
+                }
+            },
+            // 排序變更
+            doSort (header) {
+                header.desc = !header.desc;
+                this.pagination.sort = `${header.field},${header.desc ? 'desc' : 'asc'}`;
+            }
+        },
+        filters: {
+            $_formatDate (text) {
+                if (text.length > 10) return `${text.substring(0, 10)}`
+                else return text
+            }
+        }
+    })
+</script>
+
+</body>
+
+</html>

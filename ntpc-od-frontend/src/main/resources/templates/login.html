@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="template :: head"></head>
+
+<body class="bg-gradient-primary">
+
+<div id="vueApp" v-cloak class="container">
+
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+
+        <div class="col-xl-10 col-lg-12 col-md-9">
+
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                </div>
+                                <form class="user">
+                                    <div class="form-group">
+                                        <input v-model="username"
+                                               @input="$v.username.$touch()"
+                                               class="form-control form-control-user"
+                                               :class="{'invalid-field':$v.username.$error, 'valid-field':!$v.username.$error && $v.username.$dirty}"
+                                               id="exampleInputUsername"
+                                               aria-describedby="accountHelp"
+                                               placeholder="請輸入帳號">
+                                        <p v-show="$v.username.$error" class="invalid-text">請輸入帳號</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <input v-model="password"
+                                               @input="$v.password.$touch()"
+                                               :class="{'invalid-field':$v.password.$error, 'valid-field':!$v.password.$error && $v.password.$dirty}"
+                                               type="password"
+                                               class="form-control form-control-user"
+                                               id="exampleInputPassword"
+                                               placeholder="請輸入密碼">
+                                        <p v-show="$v.password.$error" class="invalid-text">請輸入密碼</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox small">
+                                            <input type="checkbox" class="custom-control-input" id="customCheck">
+                                            <label class="custom-control-label" for="customCheck">Remember Me</label>
+                                        </div>
+                                    </div>
+                                    <button :disabled="$v.$invalid"
+                                            @click="doSubmit"
+                                            type="button"
+                                            class="btn btn-primary btn-user btn-block">
+                                        <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <span v-else>Login</span>
+                                    </button>
+                                    <hr>
+                                    <a href="index.html" class="btn btn-google btn-user btn-block">
+                                        <i class="fab fa-google fa-fw"></i> Login with Google
+                                    </a>
+                                    <a href="index.html" class="btn btn-facebook btn-user btn-block">
+                                        <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
+                                    </a>
+                                </form>
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" href="forgot-password.html">Forgot Password?</a>
+                                </div>
+                                <div class="text-center">
+                                    <a class="small" href="register.html">Create an Account!</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script type="application/javascript" th:inline="javascript">
+    // 設定vuelidate驗證套件
+    // https://vuelidate.netlify.com/#sub-v-values
+    Vue.use(window.vuelidate.default);
+    const required = validators.required;
+
+    const app = new Vue({
+        el: '#vueApp',
+        data: {
+            username: '',
+            password: '',
+            loading: false
+        },
+        validations: {
+            username: {required},
+            password: {required}
+        },
+        methods: {
+            doSubmit () {
+                this.loading = true;
+                $.post('/login/checkLogin', {username: this.username, password: this.password})
+                 .done(resp => { if (resp.result === 'success') location.href = "/" })
+                 .fail(resp => { alert(resp.message) })
+                 .always(() => { this.loading = false })
+            }
+        }
+    })
+</script>
+
+</body>
+
+</html>
