@@ -18,8 +18,9 @@ import java.util.Optional;
 import static com.udn.ntpc.od.frontend.controller.PageController.USER_KEY;
 
 @Slf4j
+// Configuration的理解: https://blog.csdn.net/koflance/article/details/59304090
 @Configuration
-// Ref. https://docs.spring.io/spring/docs/5.1.7.RELEASE/spring-framework-reference/web.html#mvc-config-customize
+// https://docs.spring.io/spring/docs/5.1.7.RELEASE/spring-framework-reference/web.html#mvc-config-customize
 public class WebMvcConfig implements WebMvcConfigurer {
 
     // 增加快速Mapping Controller
@@ -38,7 +39,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     // 設定CORS Header
-    // Ref. https://www.baeldung.com/spring-cors
+    // CROS解決AJAX跨域問題: https://www.jianshu.com/p/e21f82495fab
     // Ref. http://tomcat.apache.org/tomcat-8.0-doc/config/filter.html#CORS_Filter
     @Override
     public void addCorsMappings(CorsRegistry registry) {

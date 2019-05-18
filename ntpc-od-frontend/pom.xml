@@ -2,11 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.udn.ntpc.od</groupId>
         <artifactId>opendata</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+
     <artifactId>frontend</artifactId>
     <name>frontend</name>
     <description>New Taipei City Open Data</description>
@@ -14,7 +16,7 @@
     <packaging>${packaging.type}</packaging>
 
     <dependencies>
-        <!--Opendata mudules-->
+        <!--Opendata modules-->
         <dependency>
             <groupId>com.udn.ntpc.od</groupId>
             <artifactId>common</artifactId>
@@ -28,16 +30,18 @@
             <artifactId>test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--Spring Boot-->
+        <!--Spring Boot Modules-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!--Thymeleaf: https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html-->
+        <!--預設路徑: https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html#spring-mvc-configuration-->
+        <!--Getting started: https://www.thymeleaf.org/doc/articles/standarddialect5minutes.html-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
-        <!--Thymeleaf-->
         <dependency>
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf-spring5</artifactId>
@@ -68,9 +72,10 @@
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
+            <!--https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/htmlsingle/#getting-started-first-application-executable-jar-->
             <plugin>
-                <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.springframework.boot</groupId>
             </plugin>
         </plugins>
     </build>
